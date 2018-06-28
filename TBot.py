@@ -11,6 +11,7 @@ class Telegram(object):
 		if callback_chat_id:
 			self.callback_chat_id = callback_chat_id
 		self.validCommands = ( '/help', '/start' )
+		self.update_offset = '' #init
 
 
 	def sendTxtMessage(self, content, chat_id):
@@ -60,9 +61,16 @@ class Telegram(object):
 
 
 	def getUpdates(self):
-		r = requests.get(self.baseurl + 'getUpdates')
+		'''Gets updates via polling'''
+		if self.update_offset:
+			update_offset = int(self.update_offset + 1)
+			r = requests.get(self.baseurl + 'getUpdates', data = { 'offset':update_offset })
+		else:
+			r = requests.get(self.baseurl + 'getUpdates')
 		self.updates = r.json()
 		updates = self.parseUpdates()
+		if updates:
+			self.update_offset = updates[-1]['update_id']
 		return updates
 
 	def parseUpdates(self):
