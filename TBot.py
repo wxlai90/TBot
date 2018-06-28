@@ -18,8 +18,8 @@ class Telegram(object):
 		data['chat_id'] = chat_id
 		data['text'] = content 
 		r = requests.post(self.baseurl + 'sendMessage', data = data)
-		if r.status_code != 200:
-			raise AssertionError
+		assert r.status_code == 200
+
 
 	def sendHTMLMessage(self, content, chat_id):
 		data = {}
@@ -27,8 +27,7 @@ class Telegram(object):
 		data['text'] = content
 		data['parse_mode'] = 'HTML'
 		r = requests.post(self.baseurl + 'sendMessage', data = data)
-		if r.status_code != 200:
-			raise AssertionError
+		assert r.status_code == 200
 
 	def sendPhotoFile(self, filepath, chat_id):
 		f = open(filepath, 'rb')
@@ -36,8 +35,7 @@ class Telegram(object):
 		data['chat_id'] = chat_id
 		files = { 'photo' : open(filepath, 'rb') }
 		r = requests.post(self.baseurl + 'sendPhoto', data = data, files = files)
-		if r.status_code != 200:
-			raise AssertionError
+		assert r.status_code == 200
 
 	def sendAudioFile(self, filepath, chat_id):
 		f = open(filepath, 'rb')
@@ -45,17 +43,14 @@ class Telegram(object):
 		data['chat_id'] = chat_id
 		files = { 'audio' : open(filepath, 'rb') }
 		r = requests.post(self.baseurl + 'sendAudio', data = data, files = files)
-		if r.status_code != 200:
-			raise AssertionError
-
+		assert r.status_code == 200
 
 	def sendPhotoID(self, photo_id, chat_id):
 		data = {}
 		data['chat_id'] = chat_id
 		data['photo'] = photo_id
 		r = requests.post(self.baseurl + 'sendPhoto', data = data)
-		if r.status_code != 200:
-			raise AssertionError
+		assert r.status_code == 200
 
 
 	def getUpdates(self):
