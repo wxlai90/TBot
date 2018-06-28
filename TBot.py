@@ -29,26 +29,32 @@ class Telegram(object):
 		r = requests.post(self.baseurl + 'sendMessage', data = data)
 		assert r.status_code == 200
 
-	def sendPhotoFile(self, filepath, chat_id):
+	def sendPhotoFile(self, filepath, chat_id, **kargs):
 		f = open(filepath, 'rb')
 		data = {}
 		data['chat_id'] = chat_id
 		files = { 'photo' : open(filepath, 'rb') }
+		if 'caption' in kargs:
+			files['caption'] = kargs['caption']
 		r = requests.post(self.baseurl + 'sendPhoto', data = data, files = files)
 		assert r.status_code == 200
 
-	def sendAudioFile(self, filepath, chat_id):
+	def sendAudioFile(self, filepath, chat_id, **kargs):
 		f = open(filepath, 'rb')
 		data = {}
 		data['chat_id'] = chat_id
 		files = { 'audio' : open(filepath, 'rb') }
+		if 'caption' in kargs:
+			files['caption'] = kargs['caption']
 		r = requests.post(self.baseurl + 'sendAudio', data = data, files = files)
 		assert r.status_code == 200
 
-	def sendPhotoID(self, photo_id, chat_id):
+	def sendPhotoID(self, photo_id, chat_id, **kargs):
 		data = {}
 		data['chat_id'] = chat_id
 		data['photo'] = photo_id
+		if 'caption' in kargs:
+			data['caption'] = kargs['caption']
 		r = requests.post(self.baseurl + 'sendPhoto', data = data)
 		assert r.status_code == 200
 
@@ -56,8 +62,39 @@ class Telegram(object):
 	def getUpdates(self):
 		r = requests.get(self.baseurl + 'getUpdates')
 		self.updates = r.json()
-		
-	
+		updates = self.parseUpdates()
+		return updates
+
+	def parseUpdates(self):
+		updates_list = []
+		for i in self.updates['result']:
+			updates = {}
+			updates['update_id'] = i['update_id']
+			updates['from_chat_id'] = i['message']['from']['id']
+			try:
+				updates['first_name'] = i['message']['from']['first_name']
+			except KeyError as e:
+				print 'Key not found in JSON update ({})'.format(e)
+			try:
+				updates['username'] = i['message']['from']['username']
+			except KeyError as e:
+				print 'Key not found in JSON update ({})'.format(e)
+			try:
+				updates['text'] = i['message']['text']
+			except KeyError as e:
+				print 'Key not found in JSON update ({})'.format(e)
+			try:
+				updates['photo'] = i['message']['photo'][-1]['file_id']
+			except KeyError as e:
+				print 'Key not found in JSON update ({})'.format(e)
+			try:
+				updates['caption'] = i['message']['caption']
+			except KeyError as e:
+				print 'Key not found in JSON update ({})'.format(e)
+			updates_list.append(updates)
+		return updates_list
+
+
 	def processUpdate(self, command):
 		cmd = command.lower().strip('/')
 		if '/{}'.format(cmd) in self.validCommands:
