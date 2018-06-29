@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import requests
-
+import json
 
 class Telegram(object):
 
@@ -18,6 +18,17 @@ class Telegram(object):
 		data = {}
 		data['chat_id'] = chat_id
 		data['text'] = content 
+		r = requests.post(self.baseurl + 'sendMessage', data = data)
+		assert r.status_code == 200
+
+	def sendInlineKBCallback(self, content, chat_id, **kargs):
+		if 'text_shown' not in kargs or 'callback_data' not in kargs:
+			raise KeyError
+		data = {}
+		data['chat_id'] = chat_id
+		data['text'] = content
+		inline_keyboard = { 'inline_keyboard' : [[ { 'text':'{}'.format(kargs['text_shown']), 'callback_data': '{}'.format(kargs['callback_data']) } ]] }
+		data['reply_markup'] =  json.dumps(inline_keyboard)
 		r = requests.post(self.baseurl + 'sendMessage', data = data)
 		assert r.status_code == 200
 
@@ -78,7 +89,10 @@ class Telegram(object):
 		for i in self.updates['result']:
 			updates = {}
 			updates['update_id'] = i['update_id']
-			updates['from_chat_id'] = i['message']['from']['id']
+			try:
+				updates['from_chat_id'] = i['message']['from']['id']
+			except KeyError as e:
+				print 'Key not found in JSON update ({})'.format(e)
 			try:
 				updates['first_name'] = i['message']['from']['first_name']
 			except KeyError as e:
@@ -97,6 +111,10 @@ class Telegram(object):
 				print 'Key not found in JSON update ({})'.format(e)
 			try:
 				updates['caption'] = i['message']['caption']
+			except KeyError as e:
+				print 'Key not found in JSON update ({})'.format(e)
+			try:
+				updates['callback_data'] = i['callback_query']['data']
 			except KeyError as e:
 				print 'Key not found in JSON update ({})'.format(e)
 			updates_list.append(updates)
