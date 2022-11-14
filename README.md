@@ -1,2 +1,3 @@
 # TBot
-Telegram Bot
+
+Go bindings for Telegram Bot API
