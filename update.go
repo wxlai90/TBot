@@ -1,30 +1,29 @@
 package tbot
 
-var updated = false
+var updateOffset = 0
 
 type Update struct {
 	Text   string
 	ChatID int
-	Type   int
+	Type   string
 }
 
 func (u *Update) ReplyTextMessage(text string) {
 	sendMessage(u.ChatID, text)
 }
 
-func getUpdate() Update {
-	// TODO: parse and determine the type
-
-	if !updated {
-		update := Update{
-			Text:   "some text",
-			ChatID: 340522357,
-			Type:   TEXT,
-		}
-
-		updated = true
-		return update
+func getTbotUpdates() []Update {
+	updates, err := getUpdates(updateOffset)
+	if err != nil {
+		// log.Printf("Error getting updates, error=%s\n", err)
+		panic(err)
 	}
 
-	return Update{}
+	tbotUpdates := []Update{}
+	for _, update := range updates.Result {
+		tbotUpdates = append(tbotUpdates, Update{Text: update.Message.Text, ChatID: update.Message.From.ID, Type: TEXT})
+		updateOffset = update.UpdateID + 1
+	}
+
+	return tbotUpdates
 }

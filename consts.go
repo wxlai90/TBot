@@ -12,5 +12,5 @@ var (
 )
 
 const (
-	TEXT = iota
+	TEXT = "TEXT"
 )
