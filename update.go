@@ -1,29 +1,16 @@
 package tbot
 
+import "github.com/wxlai90/tbot/models"
+
 var updateOffset = 0
 
-type Update struct {
-	Text   string
-	ChatID int
-	Type   string
-}
-
-func (u *Update) ReplyTextMessage(text string) {
-	sendMessage(u.ChatID, text)
-}
-
-func getTbotUpdates() []Update {
-	updates, err := getUpdates(updateOffset)
+func getTbotUpdates() *models.Update {
+	update, err := getUpdates(updateOffset)
 	if err != nil {
-		// log.Printf("Error getting updates, error=%s\n", err)
 		panic(err)
 	}
 
-	tbotUpdates := []Update{}
-	for _, update := range updates.Result {
-		tbotUpdates = append(tbotUpdates, Update{Text: update.Message.Text, ChatID: update.Message.From.ID, Type: TEXT})
-		updateOffset = update.UpdateID + 1
-	}
+	updateOffset = update.Result[len(update.Result)-1].UpdateID + 1
 
-	return tbotUpdates
+	return update
 }

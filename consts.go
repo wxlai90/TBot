@@ -10,7 +10,3 @@ var (
 	DELETE_MESSAGE            = "https://api.telegram.org/bot%s/deleteMessage"
 	FORWARD_MESSAGE           = "https://api.telegram.org/bot%s/forwardMessage"
 )
-
-const (
-	TEXT = "TEXT"
-)
